@@ -1,0 +1,52 @@
+services:
+  # Airflow worker
+  airflow-worker:
+    image: bitnami/airflow:latest
+    environment:
+      - AIRFLOW_COMPONENT_TYPE=worker
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+
+  # Airflow scheduler
+  airflow-scheduler:
+    image: bitnami/airflow:latest
+    environment:
+      - AIRFLOW_COMPONENT_TYPE=scheduler
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+
+  # Airflow webserver
+  airflow:
+    image: bitnami/airflow:latest
+    environment:
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_PASSWORD=${AF_USER}
+      - AIRFLOW_USERNAME=${AF_PWD}
+
+  # ClickHouse OLAP DB
+  clickhouse:
+    image: docker.io/bitnami/clickhouse:24
+    environment:
+      - CLICKHOUSE_ADMIN_USER=${CH_ADMIN_USER}
+      - CLICKHOUSE_ADMIN_PASSWORD=${CH_ADMIN_PWD}
+    ports:
+      - '8123:8123'
+    volumes:
+      - clickhouse_data:/bitnami/clickhouse
+    networks:
+      - etl_network
+
+volumes:
+  clickhouse_data:
+    driver: local
+
+networks:
+  etl_network:
+    driver: bridge
