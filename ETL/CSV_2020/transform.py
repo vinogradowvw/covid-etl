@@ -5,7 +5,7 @@ import numpy as np
 df = pd.read_csv('./Data/data_2020.csv')
 
 df.replace(0, np.NaN, inplace=True)
-df.ffill()
+df.ffill(inplace=True)
 
 # select only Russia
 df = df.loc[df['geoId'] == 'RU']
@@ -21,14 +21,17 @@ columns_to_drop = [
     'Cumulative_number_for_14_days_of_COVID-19_cases_per_100000',
     'countryterritoryCode'
 ]
+
 df.drop(columns=columns_to_drop, inplace=True)
 
 
 # transforming date to timestamp and popData2019 to int
-def transform(row):
-    row['dateRep'] = datetime.fromisoformat('-'.join(row['dateRep'].split('/')[::-1])).timestamp()
-    row['popData2019'] = int(row['popData2019'])
-    return row
+
+df = df.astype(int, errors='ignore')
 
 
-df = df.apply(transform, axis=1)
+def transform_to_timestamp(time_str):
+    return datetime.fromisoformat('-'.join(time_str.split('/')[::-1]))
+
+
+df['dateRep'] = df.apply(lambda x: transform_to_timestamp(x['dateRep']), axis=1)
