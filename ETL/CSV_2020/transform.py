@@ -19,7 +19,8 @@ columns_to_drop = [
     'month',
     'year',
     'Cumulative_number_for_14_days_of_COVID-19_cases_per_100000',
-    'countryterritoryCode'
+    'countryterritoryCode',
+    'popData2019'
 ]
 
 df.drop(columns=columns_to_drop, inplace=True)
@@ -35,3 +36,6 @@ def transform_to_timestamp(time_str):
 
 
 df['dateRep'] = df.apply(lambda x: transform_to_timestamp(x['dateRep']), axis=1)
+
+# rename columns
+df.rename(columns={'dateRep': 'date'}, inplace=True)
