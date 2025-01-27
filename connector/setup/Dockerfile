@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache bash curl
+RUN apk add --no-cache bash curl jq
 
 COPY setupscript.sh /setupscript.sh
 COPY clickhouse-connect.json /clickhouse-connect.json

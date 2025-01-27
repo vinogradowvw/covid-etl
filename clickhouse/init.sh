@@ -2,8 +2,8 @@
 
 clickhouse-client -u ${CLICKHOUSE_ADMIN_USER} --password ${CLICKHOUSE_ADMIN_PASSWORD} --query="CREATE DATABASE IF NOT EXISTS covid;"
 
-clickhouse-client -u ${CLICKHOUSE_ADMIN_USER} --password ${CLICKHOUSE_ADMIN_PASSWORD} --query="CREATE TABLE IF NOT EXISTS covid.covid (
-    date DateTime,
+clickhouse-client -u ${CLICKHOUSE_ADMIN_USER} --password ${CLICKHOUSE_ADMIN_PASSWORD} --query="CREATE TABLE IF NOT EXISTS covid.etl(
+    date Date,
     cases Int32,
     deaths Int32
 ) ENGINE = MergeTree()

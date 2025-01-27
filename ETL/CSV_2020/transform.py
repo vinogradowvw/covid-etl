@@ -4,7 +4,7 @@ import numpy as np
 
 df = pd.read_csv('./Data/data_2020.csv')
 
-df.replace(0, np.NaN, inplace=True)
+df.replace(0, np.nan, inplace=True)
 df.ffill(inplace=True)
 
 # select only Russia
@@ -32,7 +32,7 @@ df = df.astype(int, errors='ignore')
 
 
 def transform_to_timestamp(time_str):
-    return datetime.fromisoformat('-'.join(time_str.split('/')[::-1]))
+    return '-'.join(time_str.split('/')[::-1])
 
 
 df['dateRep'] = df.apply(lambda x: transform_to_timestamp(x['dateRep']), axis=1)
