@@ -68,43 +68,6 @@ services:
       CLICKHOUSE_USER: ${CH_ADMIN_USER}
     network_mode: "host"
 
-  # Airflow worker
-  airflow-worker:
-    image: bitnami/airflow:latest
-    environment:
-      - AIRFLOW_COMPONENT_TYPE=worker
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
-    networks:
-      - etl_network
-
-  # Airflow scheduler
-  airflow-scheduler:
-    image: bitnami/airflow:latest
-    environment:
-      - AIRFLOW_COMPONENT_TYPE=scheduler
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
-    networks:
-      - etl_network
-
-  # Airflow webserver
-  airflow:
-    image: bitnami/airflow:latest
-    environment:
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
-      - AIRFLOW_PASSWORD=${AF_USER}
-      - AIRFLOW_USERNAME=${AF_PWD}
-    networks:
-      - etl_network
-
   # ClickHouse OLAP DB
   clickhouse:
     image: docker.io/bitnami/clickhouse:24
@@ -119,7 +82,88 @@ services:
     networks:
       - etl_network
 
-  # ---------------------- UI -------------------------
+  # --------------------------------- Airflow ---------------------------------
+  # Airflow worker
+  airflow-worker:
+    image: bitnami/airflow:latest
+    environment:
+      - AIRFLOW_COMPONENT_TYPE=worker
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_WEBSERVER_HOST=airflow
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_SECRET_KEY=a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    volumes:
+      - ./Airflow/covid_etl/requirements.txt:/bitnami/python/requirements.txt
+      - ./Airflow/covid_etl:/opt/bitnami/airflow/dags/covid_etl
+    networks:
+      - etl_network
+
+  # Airflow scheduler
+  airflow-scheduler:
+    image: bitnami/airflow:latest
+    environment:
+      - AIRFLOW_COMPONENT_TYPE=scheduler
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_WEBSERVER_HOST=airflow
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_SECRET_KEY=a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    volumes:
+      - ./Airflow/covid_etl/requirements.txt:/bitnami/python/requirements.txt
+      - ./Airflow/covid_etl:/opt/bitnami/airflow/dags/covid_etl
+    networks:
+      - etl_network
+
+  # Airflow webserver
+  airflow:
+    image: bitnami/airflow:latest
+    ports:
+      - '8090:8090'
+    environment:
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_PASSWORD=${AF_PWD}
+      - AIRFLOW_USERNAME=${AF_USER}
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_SECRET_KEY=a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    volumes:
+      - ./Airflow/covid_etl/requirements.txt:/bitnami/python/requirements.txt
+      - ./Airflow/covid_etl:/opt/bitnami/airflow/dags/covid_etl
+    networks:
+      - etl_network
+
+  # Databases for Airflow
+  postgresql:
+    image: docker.io/bitnami/postgresql:latest
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+    environment:
+      - POSTGRESQL_DATABASE=bitnami_airflow
+      - POSTGRESQL_USERNAME=${AF_DB_USER}
+      - POSTGRESQL_PASSWORD=${AF_DB_PWD}
+    networks:
+      - etl_network
+
+  redis:
+    image: docker.io/bitnami/redis:latest
+    volumes:
+      - 'redis_data:/bitnami'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - etl_network
+
+  # ------------------------- UI -----------------------------
   # Kafka UI
   kafka-ui:
     container_name: kafka-ui
@@ -150,6 +194,11 @@ services:
 volumes:
   clickhouse_data:
     driver: local
+  postgresql_data:
+    driver: local
+  redis_data:
+    driver: local
+
 
 networks:
   etl_network:
