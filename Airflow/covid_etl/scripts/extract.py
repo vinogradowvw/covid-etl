@@ -1,7 +1,7 @@
 import requests
 
 
-def extract():
+def _extract_2020_data():
 
     url = "https://drive.google.com/uc?id=18Q2VzN9nVZl9CD6a4kC3JoETe4QCxS3h"
     output_path = "/opt/bitnami/airflow/dags/covid_etl/data/data_2020.csv"

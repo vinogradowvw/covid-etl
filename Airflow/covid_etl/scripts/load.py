@@ -2,7 +2,7 @@ from confluent_kafka import Producer
 import json
 
 
-def load_recods(records):
+def load_records(records):
     producer = Producer({'bootstrap.servers': 'kafka:9092'})
 
     for message in records:
