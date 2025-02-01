@@ -1,19 +1,17 @@
-import asyncio
-from rest.core.dependencies import get_client
 from datetime import datetime
-from pandas.core.base import DataFrame
+from pandas import DataFrame
 from typing import List
 
 
 class Repository():
 
-    def __init__(self) -> None:
-        self.__client = asyncio.run(get_client())
+    def __init__(self, client) -> None:
+        self.client = client
 
     async def find_by_time_interval(self,
                                     time_start: datetime,
                                     time_end: datetime,
-                                    columns: List[str]
+                                    columns: List[str] = ['deaths', 'cases']
                                     ) -> DataFrame:
         parameters = {'start': time_start,
                       'end': time_end}
@@ -26,9 +24,11 @@ class Repository():
                  FROM covid.etl
                  WHERE date < {end:DateTime} AND date > {start:DateTime}
                  """
-        return await self.__client.query_df(query=query, parameters=parameters)
+        return await self.client.query_df(query=query, parameters=parameters)
 
-    async def find_all(self, columns: List[str]) -> DataFrame:
+    async def find_all(self,
+                       columns: List[str] = ['deaths', 'cases']
+                       ) -> DataFrame:
         query = 'SELECT date, '
         for column in columns:
             query += f'{column}, '
@@ -37,4 +37,4 @@ class Repository():
         query += """
                  FROM covid.etl
                  """
-        return await self.__client.query_df(query=query)
+        return await self.client.query_df(query=query)
