@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get('/')
 async def get_all_data(service: Service = Depends(get_service)):
-    return service.get_all_data(columns=['cases'])
+    return await service.get_all_data(columns=['cases'])
 
  
 @router.get('/cases')
@@ -39,4 +39,4 @@ async def get_all_deaths(
 async def get_summary(
     service: Service = Depends(get_service)
 ):
-    return service.get_summary()
+    return await service.get_summary()

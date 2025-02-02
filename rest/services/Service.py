@@ -20,7 +20,6 @@ class Service():
 
     async def get_all_data(self, columns: list[str]) -> dict:
         df = await self.__repository.find_all(columns)
-        print(df.to_dict(orient="list"))
         return df.to_dict(orient="list")
 
     async def get_summary(self) -> dict:
@@ -28,16 +27,16 @@ class Service():
         summary = {}
 
         for column in df.columns:
+            if column == 'date':
+                continue
             max_idx = df[column].idxmax()
             max_row = df.iloc[max_idx]
             summary['max_' + column] = {'time': max_row['date'],
-                                        'value': max_row[column]}
-
-        for column in df.columns:
+                                        'value': float(max_row[column])}
             min_idx = df[column].idxmin()
             min_row = df.iloc[min_idx]
             summary['min_' + column] = {'time': min_row['date'],
-                                        'value': min_row[column]}
+                                        'value': float(min_row[column])}
 
         summary['mean'] = df.drop(columns=['date']).mean().to_dict()
 
