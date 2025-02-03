@@ -1,6 +1,5 @@
 from airflow import DAG
 from covid_etl.tasks.branching import get_branching_task
-from covid_etl.tasks.tasks_2020_data import get_extract_2020_task
 from covid_etl.tasks.tasks_2020_data import get_transform_2020_task
 from covid_etl.tasks.tasks_2020_data import get_load_2020_task
 from covid_etl.tasks.new_data import get_extract_new_data_task
@@ -19,7 +18,6 @@ with DAG(
     branching = get_branching_task(dag)
 
     # 2020 data pipeline
-    extract_2020 = get_extract_2020_task(dag)
     transform_2020 = get_transform_2020_task(dag)
     load_2020 = get_load_2020_task(dag)
 
@@ -30,6 +28,6 @@ with DAG(
     # New Data
     extract_new_data = get_extract_new_data_task(dag)
 
-    branching >> [extract_new_data, extract_2020]
-    extract_2020 >> transform_2020 >> load_2020 >> transform_2024 >> load_2024 >> extract_new_data
+    branching >> [extract_new_data, transform_2020]
+    transform_2020 >> load_2020 >> transform_2024 >> load_2024 >> extract_new_data
 

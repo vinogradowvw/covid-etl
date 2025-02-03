@@ -5,7 +5,7 @@ from datetime import timedelta
 
 
 def _transform_2020_data():
-    df = pd.read_csv('/opt/bitnami/airflow/dags/covid_etl/data/data_2020.csv')
+    df = pd.read_csv('https://drive.google.com/uc?id=18Q2VzN9nVZl9CD6a4kC3JoETe4QCxS3h')
 
     df.replace(0, np.nan, inplace=True)
     df.ffill(inplace=True)

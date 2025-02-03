@@ -4,15 +4,6 @@ from covid_etl.scripts.load import load_records
 from covid_etl.scripts.transform import _transform_2020_data
 
 
-# Extract 2020 data
-def get_extract_2020_task(dag):
-    return PythonOperator(
-        task_id='extract_2020_data',
-        python_callable=_extract_2020_data,
-        dag=dag
-    )
-
-
 # Transform old data from csv task
 def transform_2020_data(ti):
     ti.xcom_push(key='2020_transformed_data', value=_transform_2020_data())
