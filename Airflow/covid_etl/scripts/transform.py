@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import timedelta
 
 
 def _transform_2020_data():
@@ -56,14 +57,18 @@ def _transform_2024_data():
     # filter only actual data
     df = df.loc[df['Date_reported'] > datetime.fromisoformat('2020-12-14')]
 
+    # filling null values for the weekly reports (after 15.05.2023)
+    df = df.bfill().ffill()
+
+    df_weekly = df.loc[df['date'] > datetime.fromisoformat('2023-05-15')]
+    df.loc[df['date'] > datetime.fromisoformat('2023-05-15'), ['cases', 'deaths']] = df_weekly[['cases', 'deaths']] // 7
+
     # transform data back to string
     df['Date_reported'] = df['Date_reported'].apply(lambda x: x.strftime('%Y-%m-%d'))
 
     # rename columns
     df.rename(columns={'Date_reported': 'date', 'New_cases': 'cases', 'New_deaths': 'deaths'}, inplace=True)
 
-    # fill null vlues and transform to int
-    df.ffill(inplace=True)
     df = df.astype(int, errors='ignore')
 
     return df.to_dict(orient='records')
