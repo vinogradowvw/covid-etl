@@ -1,5 +1,4 @@
 from airflow.operators.python import PythonOperator
-from covid_etl.scripts.extract import _extract_2020_data
 from covid_etl.scripts.load import load_records
 from covid_etl.scripts.transform import _transform_2020_data
 

@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from datetime import timedelta
-
+from airflow.models import Variable
 
 def _transform_2020_data():
     df = pd.read_csv('https://drive.google.com/uc?id=18Q2VzN9nVZl9CD6a4kC3JoETe4QCxS3h')
@@ -57,6 +56,9 @@ def _transform_2024_data():
     # filter only actual data
     df = df.loc[df['Date_reported'] > datetime.fromisoformat('2020-12-14')]
 
+    # rename columns
+    df.rename(columns={'Date_reported': 'date', 'New_cases': 'cases', 'New_deaths': 'deaths'}, inplace=True)
+
     # filling null values for the weekly reports (after 15.05.2023)
     df = df.bfill().ffill()
 
@@ -64,11 +66,11 @@ def _transform_2024_data():
     df.loc[df['date'] > datetime.fromisoformat('2023-05-15'), ['cases', 'deaths']] = df_weekly[['cases', 'deaths']] // 7
 
     # transform data back to string
-    df['Date_reported'] = df['Date_reported'].apply(lambda x: x.strftime('%Y-%m-%d'))
-
-    # rename columns
-    df.rename(columns={'Date_reported': 'date', 'New_cases': 'cases', 'New_deaths': 'deaths'}, inplace=True)
+    df['date'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
 
     df = df.astype(int, errors='ignore')
+
+    last_date = df['date'].to_list()[-1]
+    Variable.set('last_data_date', last_date)
 
     return df.to_dict(orient='records')
