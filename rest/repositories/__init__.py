@@ -1,1 +1,3 @@
+from repositories.CovidDataRepository import CovidDataRepository
 from repositories.Repository import Repository
+from repositories.UserRepository import UserRepository

@@ -10,10 +10,11 @@ async def get_client() -> AsyncClient:
     env_path = BASE_DIR / ".env"
     load_dotenv(env_path)
     ch_host: str = 'localhost' if os.getenv('CH_HOST') is None else str(os.getenv('CH_HOST'))
-    if (os.getenv('CH_PORT') is None):
+    ch_port = os.getenv('CH_PORT')
+    if (ch_port is None):
         ch_port: int = 8123
-    elif (os.getenv('CH_HOST').isnumeric()):
-        ch_port: int = int(os.getenv('CH_HOST'))
+    elif (ch_port.isnumeric()):
+        ch_port: int = int(ch_port)
     else:
         raise TypeError("ClickHouse port environment variable must be a integer!")
 

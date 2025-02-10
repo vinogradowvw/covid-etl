@@ -1,1 +1,2 @@
-from services.Service import Service
+from services.CovidDataService import CovidDataService
+from services.UserService import UserService
