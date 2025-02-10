@@ -1,0 +1,3 @@
+
+class DuplicateUserError(Exception):
+    pass
