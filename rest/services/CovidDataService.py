@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from datetime import datetime, date
+from datetime import date
 from datetime import timedelta
 from scipy.stats import linregress
 from repositories import CovidDataRepository
@@ -11,8 +11,8 @@ class CovidDataService():
         self.__repository = repository
 
     async def get_data_by_time_interval(self,
-                                        start: datetime,
-                                        end: datetime,
+                                        start: date,
+                                        end: date,
                                         columns: list[str]
                                         ) -> dict:
         df = await self.__repository.find_by_time_interval(start, end, columns)
