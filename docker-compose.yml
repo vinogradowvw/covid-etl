@@ -90,8 +90,8 @@ services:
       - AIRFLOW_COMPONENT_TYPE=worker
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_DATABASE_USERNAME=${PG_ADMIN_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${PG_ADMIN_PWD}
       - AIRFLOW_WEBSERVER_HOST=airflow
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
       - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
@@ -109,8 +109,8 @@ services:
       - AIRFLOW_COMPONENT_TYPE=scheduler
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_DATABASE_USERNAME=${PG_ADMIN_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${PG_ADMIN_PWD}
       - AIRFLOW_WEBSERVER_HOST=airflow
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
       - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
@@ -129,8 +129,8 @@ services:
     environment:
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=${AF_DB_USER}
-      - AIRFLOW_DATABASE_PASSWORD=${AF_DB_PWD}
+      - AIRFLOW_DATABASE_USERNAME=${PG_ADMIN_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${PG_ADMIN_PWD}
       - AIRFLOW_PASSWORD=${AF_PWD}
       - AIRFLOW_USERNAME=${AF_USER}
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8090
@@ -142,15 +142,17 @@ services:
     networks:
       - etl_network
 
-  # Databases for Airflow
+  # Databases for Airflow and users
   postgresql:
     image: docker.io/bitnami/postgresql:latest
+    ports:
+      - 5432:5432
     volumes:
       - 'postgresql_data:/bitnami/postgresql'
     environment:
       - POSTGRESQL_DATABASE=bitnami_airflow
-      - POSTGRESQL_USERNAME=${AF_DB_USER}
-      - POSTGRESQL_PASSWORD=${AF_DB_PWD}
+      - POSTGRESQL_USERNAME=${PG_ADMIN_USER}
+      - POSTGRESQL_PASSWORD=${PG_ADMIN_PWD}
     networks:
       - etl_network
 
@@ -163,7 +165,6 @@ services:
     networks:
       - etl_network
 
-  # ------------------------- UI -----------------------------
   # Kafka UI
   kafka-ui:
     container_name: kafka-ui
@@ -173,23 +174,31 @@ services:
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
     volumes:
-      - ./UI/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+      - ./UI//kui/config.yml:/etc/kafkaui/dynamic_config.yaml
     networks:
       - etl_network
     depends_on:
       - kafka
 
-  # Kafka connect UI
-  kafka-connect-ui:
-    image: landoop/kafka-connect-ui
+  # RestAPI
+  rest-api:
+    build:
+      context: ./rest/
+      dockerfile: Dockerfile
     ports:
       - 8000:8000
     environment:
-      CONNECT_URL: connect:8083
+      - CH_HOST=clickhouse
+      - CH_ADMIN_USER=${CH_ADMIN_USER}
+      - CH_ADMIN_PWD=${CH_ADMIN_PWD}
+      - PG_HOST=postgresql
+      - PG_ADMIN_USER=${PG_ADMIN_USER}
+      - PG_ADMIN_PWD=${PG_ADMIN_PWD}
     networks:
       - etl_network
     depends_on:
-      - connect
+      - clickhouse
+      - postgresql
 
 volumes:
   clickhouse_data:
