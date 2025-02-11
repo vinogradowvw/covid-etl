@@ -1,5 +1,4 @@
 from airflow.operators.python import BranchPythonOperator
-from airflow.models import Variable
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -33,6 +32,11 @@ def check_for_new_data():
 
     res = requests.get('https://xn--90aivcdt6dxbc.xn--p1ai/' + last_post_link)
     soup = BeautifulSoup(res.content, 'html.parser')
+
+    table = soup.find(attrs={'class': 'u-table-cv__wrapper'})
+    if not table:
+        return 'end'
+
     header = str(soup.find('h3').contents[0]).strip().replace('\xa0', ' ')
     header = re.sub(r"[^а-яА-ЯёЁ0-9 ]", "", header)
     pattern = r"За (\d+)ю неделю (\d{4}) года (\d{2})(\d{2})(\d{2})(\d{2})(\d{4})"
