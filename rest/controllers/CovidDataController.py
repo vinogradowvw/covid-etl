@@ -3,6 +3,7 @@ from fastapi import Depends
 from core.dependencies import get_covid_data_service
 from security.header import validate_api_key
 from services import CovidDataService
+from datetime import date
 
 router = APIRouter(dependencies=[Depends(validate_api_key)],
                    tags=["Covid Data"])
@@ -18,8 +19,8 @@ async def get_all_data(service: CovidDataService = Depends(get_covid_data_servic
 
 @router.get('/cases')
 async def get_all_cases(
-    start=None,
-    end=None,
+    start: date | None = None,
+    end: date | None = None,
     service: CovidDataService = Depends(get_covid_data_service),
 ):
     """
@@ -34,8 +35,8 @@ async def get_all_cases(
 
 @router.get('/deaths')
 async def get_all_deaths(
-    start=None,
-    end=None,
+    start: date | None = None,
+    end: date | None = None,
     service: CovidDataService = Depends(get_covid_data_service),
 ):
     """

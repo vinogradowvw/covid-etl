@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from pandas import DataFrame
 from typing import List
 from repositories.Repository import Repository
@@ -7,8 +7,8 @@ from repositories.Repository import Repository
 class CovidDataRepository(Repository):
 
     async def find_by_time_interval(self,
-                                    time_start: datetime,
-                                    time_end: datetime,
+                                    time_start: date,
+                                    time_end: date,
                                     columns: List[str] = ['deaths', 'cases']
                                     ) -> DataFrame:
         parameters = {'start': time_start,
@@ -20,7 +20,7 @@ class CovidDataRepository(Repository):
 
         query += """
                  FROM covid.etl
-                 WHERE date < {end:DateTime} AND date > {start:DateTime}
+                 WHERE date < {end:Date} AND date > {start:Date}
                  """
         return await self.client.query_df(query=query, parameters=parameters)
 

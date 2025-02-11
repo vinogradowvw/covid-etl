@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from datetime import datetime
+from datetime import datetime, date
 from datetime import timedelta
 from scipy.stats import linregress
 from repositories import CovidDataRepository
