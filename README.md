@@ -4,7 +4,8 @@
 The goal of the project is to create an ETL process to deliver data from different sources to a single repository. The main requirement for implementation is to create a system that is autonomous, scalable, so that its components are not directly dependent on each other and user intervention is minimal. RestAPI with API-key access system is implemented to provide data obtained through ETL process. The storage of incidence data is done in the ClickHouse database. PostgreSQL is used to store user data and metadata for AirFlow. Each component of the system resides in a docker container.
 
 The entire system looks like the following:
-<img width=‘1392’ alt=‘image’ src=‘https://github.com/user-attachments/assets/ad684ea0-3195-4dfb-85eb-dc50bb9a2f86’ />
+
+<img width="1392" alt="image" src="https://github.com/user-attachments/assets/ad684ea0-3195-4dfb-85eb-dc50bb9a2f86" />
 
 
 ### ETL process:
