@@ -1,54 +1,24 @@
-# ETL-процесс. RestAPI.
+# ETL process. RestAPI.
 
-## Описание проекта
-Целью проекта является создать ETL процесс для доставки данных из разных источников в одно хранилище. Основным требованием для реализации является создание такой системы, которая будет автономна, масштабируема, чтобы ее компоненты не были напрямую зависимы друг от друга и вмешательство пользователей было минимально. Для предоставления данных полученных с помощью ETL процесса реализовано RestAPI с системой доступа по API-ключам. Хранение данных о заболеваемости происходит в базе данных ClickHouse. Для хранения данных о пользователях и метаданных для AirFlow используется PostgreSQL. Каждый компонент системы находится в docker контейнере.
+## Project Description
+The goal of the project is to create an ETL process to deliver data from different sources to a single repository. The main requirement for implementation is to create a system that is autonomous, scalable, so that its components are not directly dependent on each other and user intervention is minimal. RestAPI with API-key access system is implemented to provide data obtained through ETL process. The storage of incidence data is done in the ClickHouse database. PostgreSQL is used to store user data and metadata for AirFlow. Each component of the system resides in a docker container.
 
-Вся система выглядит следующим образом:
-<img width="1392" alt="image" src="https://github.com/user-attachments/assets/ad684ea0-3195-4dfb-85eb-dc50bb9a2f86" />
-
-
-### ETL-процесс:
-
-Для выполнения скриптов, написанных для извлечения, преобразования и выгрузки данных используется AirFlow.
-
-Общие принципы:
-
-* Старые данные преобразуются с помощью библиотеки Pandas.
-* Ветвление на 2 пайплайна: загрузка старых данных (если еще не загружены) и загрузка новых данных.
-* Все данные после обработки отправляются в сериализации JSON в топик Kafka, из которого с помощью Kafka sink connector читаются и отправляются в базу данных ClickHouse
-
-Реализованы следующие группы тасков:
-- Branching таски (```BranchPythonOperator```)
-    Проверяется, загружены ли старые данные. Если они уже загруженных - процесс начинает проверять на наличие новых данных на веб странице. Проверка на наличие новых данных и старых производится с помощью переменных среды выполнения AirFlow.
-
-- transform таски (```PythonOperator```)
-    Для старых данных используется библиотека Pandas. Пропущенные значения либо заполняются прошлым не пустым значением. Данные после 15.05.2023 перестали поставляться ежедневно - вместо этого, за неделю, я принял решение просто делить эти значения на 7 и заполнять этими значениями данные по дням за прошлую неделю. Для парсинга новых данных из веб страницы используется BeautifulSoup.
-
-- ```load_data``` (```PythonOperator```)
-    Загрузка всех данных из предыдущего таска, используется один скрипт для любых данных и осуществляется через брокер Kafka и Kafka clickhouse sink connector.
+The entire system looks like the following:
+<img width=‘1392’ alt=‘image’ src=‘https://github.com/user-attachments/assets/ad684ea0-3195-4dfb-85eb-dc50bb9a2f86’ />
 
 
-Целый граф задач выглядит следующим образом:
-<img width="944" alt="image" src="https://github.com/user-attachments/assets/83d2f3eb-be30-48b5-83d2-c52c8195a303" />
+### ETL process:
 
+AirFlow is used to execute scripts written to extract, transform and upload data.
 
-### RestAPI
+General principles:
 
-Приложение написано на фреймворке FastAPI. Используется трехслойная архитектура - контроллеры, сервисы и слой доступа к данных (репозитории).
+* Old data is transformed using the Pandas library.
+* Branching into 2 pipelines: loading old data (if not already loaded) and loading new data.
+* All data after processing is sent in JSON serialisation to a Kafka topic, from which it is read using Kafka sink connector and sent to ClickHouse database
 
-Слой доступа к данных состоит из двух компонентов:
+The following groups of shuffles are implemented:
+- Branching Tasks (```BranchPythonOperator``).
+    Checks if old data is loaded. If it is already loaded, the process starts branching the old data.
 
-```UserRepository``` и ```CovidDataRepository```, используют SQLAlchemy с postgresql asyncpg DBAPI и асинхронный clickhouse client соответственно.
-
-Слой сервисов также состоит из двух компонентов по той же логике:
-```UserService``` - логика работы с пользователями, создание пользователя, проверка пароля, токена и повторная выдача токена.
-```CodivDataRepository``` - работа непосредственно с данными о заболеваемости COVID
-
-Контроллеры:
-```UserController``` - регистрация пользователей, повторная выдача апи ключа.
-```CovidDataController``` - Доступ к данным. Используется аутентификация по API ключу в заголовку *x-key*.
-
-
-Все компоненты используют Dependency Injection. Жизненный цикл сессии SQLAlchemy и клиента ClickHouse управляются внутри жизненного цикла приложения FastAPI с помощью встроенного механизма ```lifespan```.
-
-После запуска, документация будет доступна на http://localhost:8000/docs#/ или http://localhost:8000/redoc
+Translated with DeepL.com (free version)
